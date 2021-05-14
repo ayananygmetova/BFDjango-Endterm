@@ -3,3 +3,4 @@ __pycache__/
 *.py[cod]
 all_info.log
 media/
+.env
