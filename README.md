@@ -4,7 +4,8 @@ Inspired by Technodom.
 The main goal of the project is to represent an online platform for sale with quick and understandable requests. 
 
 The market place consists of 4 apps and one package with general constants and other things. 
-APPS = [
+#APPS = 
+    [
     ‘auth_’,
     ‘core’,
     ‘market’,
@@ -19,9 +20,9 @@ APPS = [
 
 It’s also used popular packages that put together a framework for the entire application.
 
-Draft guidlines:
+#Draft guidlines:
   1) Install django project
   2) Create, configure and activate virtual environment
   3) Install all packages by following command - pip install -r requirements.txt
   4) Create a table with fields - python manage.py migrate
-  5) cEnjoy!
+  5) Enjoy!
