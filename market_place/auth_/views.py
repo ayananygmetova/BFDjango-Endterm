@@ -19,25 +19,23 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class UsersView(viewsets.ModelViewSet):
-    parser_classes = [MultiPartParser, FormParser, JSONParser]
+class UsersView(viewsets.ViewSet):
+    permission_classes = (AdminPermission,)
 
-    def get_permissions(self):
-        if self.action == 'list' or self.action == 'destroy' or self.action == 'retrieve':
-            permission_classes = [AdminPermission, ] or [DirectorPermission, ]
-        else:
-            permission_classes = [AllowAny, ]
-        return [permission() for permission in permission_classes]
+    def list(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data, status.HTTP_200_OK)
 
-    def get_serializer_class(self):
-        if self.action == 'retrieve' or self.action == 'update':
-            return UserDetailsSerializer
-        return UserSerializer
-
-    def get_queryset(self):
-        if (self.action == 'list' or self.action == 'retrieve' or self.action == 'update') and self.request.user.roles == ADMIN:
-            return User.objects.all()
-        return User.objects.managers()
+    def destroy(self, request, pk):
+        try:
+            user = User.objects.filter(id=pk).first()
+            if not user:
+                raise Exception(messages.USER_DONT_FOUND)
+            user.delete()
+            return Response({'info': 'deleted'}, status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)})
 
 
 class LogoutView(APIView):
