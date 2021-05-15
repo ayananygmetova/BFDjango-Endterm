@@ -37,6 +37,16 @@ class UsersView(viewsets.ViewSet):
         except Exception as e:
             return Response({'error': str(e)})
 
+    def retrieve(self, request, pk):
+        try:
+            user = User.objects.filter(id=pk).first()
+            if not user:
+                raise Exception(messages.USER_DONT_FOUND)
+            serializer = UserDetailsSerializer(user)
+            return Response(serializer.data, status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)})
+
 
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)

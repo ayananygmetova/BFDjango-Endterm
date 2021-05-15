@@ -7,6 +7,7 @@ from auth_.models import User
 from common import messages
 from common.constants import USER_ROLES
 from core.models import City
+from core.serializers import CitySerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -23,10 +24,11 @@ class UserSerializer(serializers.ModelSerializer):
 class UserDetailsSerializer(UserSerializer):
     roles = serializers.SerializerMethodField(read_only=True)
     full_name = serializers.CharField(read_only=True)
+    cur_city = CitySerializer(read_only=True)
 
     class Meta:
         model = User
-        fields = UserSerializer.Meta.fields + ['roles', 'username', 'email', 'is_active', 'date_joined']
+        fields = UserSerializer.Meta.fields + ['roles', 'username', 'email', 'cur_city', 'is_active', 'date_joined']
 
     def get_roles(self, obj):
         roles = dict(USER_ROLES)
@@ -72,7 +74,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 
 class ChangeDetailsSerializer(serializers.Serializer):
-    cur_city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all())
+    cur_city = serializers.IntegerField()
     phone = serializers.CharField(max_length=16)
 
     def validate_phone(self, value):
@@ -90,7 +92,7 @@ class ChangeDetailsSerializer(serializers.Serializer):
         if self.validated_data.get('phone'):
             user.profile.phone = self.validated_data['phone']
             user.profile.save()
-        json_data = json.loads(json.dumps(self.validated_data))
-        for key, value in json_data.items():
-            setattr(user, key, value)
-        user.save()
+        if self.validated_data.get('cur_city'):
+            city = City.objects.get(id=self.validated_data['cur_city'])
+            user.cur_city = city
+            user.save()
