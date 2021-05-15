@@ -3,6 +3,7 @@ from django.dispatch import receiver
 
 from auth_.models import User
 from common.constants import PENDING, DONE
+from market.models import ProductAvailability
 from payments.models import Order, Transaction
 
 
@@ -32,5 +33,5 @@ def set_assignee(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Order)
 def completion_check(sender, instance, created, **kwargs):
     if instance.status == DONE:
-        instance.availability.amount -= 1
-        instance.save()
+        instance.transaction.availability.amount -= 1
+        instance.transaction.availability.save()

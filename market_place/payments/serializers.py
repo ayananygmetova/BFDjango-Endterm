@@ -32,13 +32,14 @@ class CartSerializer(serializers.ModelSerializer):
         fields = ['user', 'cart_items', 'total_sum']
 
     def get_cart_items(self, obj):
+        print(obj.cart_items.all())
         return CartItemSerializer(obj.cart_items.all(), many=True).data
 
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ['cart', ]
+        fields = ['cart', 'availability']
 
 
 class TransactionReadSerializer(serializers.ModelSerializer):

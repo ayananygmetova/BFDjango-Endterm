@@ -104,7 +104,7 @@ class ProductReviewDetailsView(viewsets.ViewSet):
             return Response({'success': True})
         except ProductReview.DoesNotExist as e:
             logger.error(f'delete review: {review_id}')
-            return Response({"error": e})
+            return Response({"error": str(e)})
 
 
 class DiscountView(viewsets.ViewSet):

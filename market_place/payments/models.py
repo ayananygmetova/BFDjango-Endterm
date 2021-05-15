@@ -52,7 +52,8 @@ class CartManager(models.Manager):
 
 
 class Cart(models.Model):
-    user = models.ForeignKey('auth_.User', on_delete=models.CASCADE, verbose_name='Пользователь', related_name='cart')
+    user = models.ForeignKey('auth_.User', on_delete=models.CASCADE, verbose_name='Пользователь', related_name='cart',
+                             null=True, blank=True)
     cart_items = models.ManyToManyField(CartItem, related_name='cart', verbose_name='Объекты корзины')
     total_sum = models.IntegerField(default=0, verbose_name='Сумма')
     objects = CartManager()
@@ -85,17 +86,24 @@ class Cart(models.Model):
             card.save()
 
     def empty_cart(self):
-        self.cart_items.all().delete()
+        for item in self.cart_items.all():
+            self.cart_items.remove(item)
+        self.save()
 
     def check_availability(self):
         city = self.user.cur_city
         items = self.cart_items.all()
-        for item in items:
-            available = ProductAvailability.objects.filter(shop__city=city)
-            product_items = available.filter(product=item.product, amount__gte=item.amount)
-            if not product_items:
-                return (DONT_AVAILABLE, item.product.name)
-        return (AVAILABLE, '')
+        available = ProductAvailability.objects.filter(shop__city=city)
+        for a in available:
+            has_products = True
+            for item in items:
+                product_items = available.filter(product=item.product, amount__gte=item.amount)
+                if not product_items:
+                    has_products = False
+            if has_products:
+                return (AVAILABLE,a.id)
+        return (DONT_AVAILABLE, '')
+
 
     @total_sum.setter
     def total_sum(self, value):
@@ -106,6 +114,8 @@ class Transaction(models.Model):
     cart = models.ForeignKey('Cart', on_delete=models.CASCADE, related_name='transaction', verbose_name='Корзина',
                              null=True, blank=True)
     date_created = models.DateTimeField(auto_now=True, verbose_name='Дата создания')
+    availability = models.ForeignKey('market.ProductAvailability', on_delete=models.SET_NULL, related_name='transaction',
+                                     verbose_name='Наличие товара', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Транзакция'

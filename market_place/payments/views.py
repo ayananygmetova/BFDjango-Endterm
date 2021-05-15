@@ -27,6 +27,12 @@ class CreditCardView(viewsets.ViewSet, mixins.CreateModelMixin):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if serializer.errors:
+            card = CreditCard.objects.filter(user=request.user).first()
+            if card:
+                card.balance += request.data['balance']
+                card.save()
+                return Response(CreditCardSerializer(card).data, status=status.HTTP_200_OK)
         logger.error(f'create credit card: {request.data} - {str(serializer.errors)}')
         return Response({'error': serializer.errors},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -80,8 +86,13 @@ class TransactionView(viewsets.ViewSet, mixins.CreateModelMixin):
                 raise Exception('У вас недостаточно средств на карте')
             is_available = cart.check_availability()
             if is_available[0] == DONT_AVAILABLE:
-                raise Exception(f'Данных товаров нет в наличии {is_available[1]}')
-            data = {"cart": cart.id}
+                raise Exception('Данных товаров нет в наличии')
+            available = is_available[1]
+            new_cart = Cart.objects.create(total_sum=cart.total_sum)
+            for cart_item in cart.cart_items.all():
+                new_cart.cart_items.add(cart_item.id)
+            new_cart.save()
+            data = {"cart": new_cart.id, 'availability': available}
             serializer = TransactionSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
@@ -109,14 +120,6 @@ class OrderView(viewsets.ModelViewSet):
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(methods=['GET'], detail=False, url_path='all', url_name='all',
-            permission_classes=(ManagerPermission,))
-    def all_orders(self, request):
-        logger.info(f'all orders')
-        queryset = Order.objects.all()
-        serializer = OrderSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
     @action(methods=['PUT'], detail=True, url_path='cancel', url_name='cancel',
             permission_classes=(IsAuthenticated,))
     def user_cancel(self, request, pk):
@@ -128,7 +131,7 @@ class OrderView(viewsets.ModelViewSet):
         return Response({'info': 'canceled'}, status=status.HTTP_200_OK)
 
     @action(methods=['PUT'], detail=True, url_path='complete', url_name='complete',
-            permission_classes=(ManagerPermission,))
+            permission_classes=(IsAuthenticated,))
     def complete_order(self, request, pk):
         logger.info(f'order completed {pk}')
         order = Order.objects.get(id=pk)
