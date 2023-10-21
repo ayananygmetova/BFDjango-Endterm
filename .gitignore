@@ -1,0 +1,6 @@
+__pycache__/
+.idea/
+*.py[cod]
+all_info.log
+media/
+.env
