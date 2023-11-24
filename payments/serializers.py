@@ -2,7 +2,7 @@ import datetime
 
 from rest_framework import serializers
 
-from payments.models import CreditCard, Order, Transaction, favorite, favoriteItem
+from payments.models import CreditCard, Order, Transaction, Favorite, FavoriteItem
 from market.serializers import ApartmentSerializer
 from common import messages
 
@@ -28,12 +28,12 @@ class favoriteSerializer(serializers.ModelSerializer):
     favorite_items = serializers.SerializerMethodField()
 
     class Meta:
-        model = favorite
+        model = Favorite
         fields = ['user', 'favorite_items', 'total_sum']
 
     def get_favorite_items(self, obj):
         print(obj.favorite_items.all())
-        return favoriteItemSerializer(obj.favorite_items.all(), many=True).data
+        return FavoriteItemSerializer(obj.favorite_items.all(), many=True).data
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -58,9 +58,9 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'transaction', 'status', 'assignee']
 
 
-class favoriteItemSerializer(serializers.ModelSerializer):
+class FavoriteItemSerializer(serializers.ModelSerializer):
     Apartment = ApartmentSerializer()
 
     class Meta:
-        model = favoriteItem
+        model = FavoriteItem
         fields = '__all__'

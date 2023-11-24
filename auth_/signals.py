@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from auth_.models import User, Profile
-from payments.models import favorite
+from payments.models import Favorite
 
 
 @receiver(post_save, sender=User)

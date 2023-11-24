@@ -19,7 +19,7 @@ class CreditCard(models.Model):
         verbose_name_plural = 'Кредитные карты'
 
 
-class favoriteItem(ApartmentUnit):
+class FavoriteItem(ApartmentUnit):
     class Meta:
         verbose_name = 'Объект корзины'
         verbose_name_plural = 'Объекты корзины'
@@ -54,7 +54,7 @@ class favoriteManager(models.Manager):
 class Favorite(models.Model):
     user = models.ForeignKey('auth_.User', on_delete=models.CASCADE, verbose_name='Пользователь', related_name='favorite',
                              null=True, blank=True)
-    favorite_items = models.ManyToManyField(favoriteItem, related_name='favorite', verbose_name='Объекты корзины')
+    favorite_items = models.ManyToManyField(FavoriteItem, related_name='favorite', verbose_name='Объекты корзины')
     total_sum = models.IntegerField(default=0, verbose_name='Сумма')
     objects = favoriteManager()
 

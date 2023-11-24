@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='favoriteItem',
+            name='FavoriteItem',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('amount', models.IntegerField(verbose_name='Количество товаров')),
@@ -82,7 +82,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='favorite',
             name='favorite_items',
-            field=models.ManyToManyField(related_name='favorite', to='payments.favoriteItem', verbose_name='Объекты корзины'),
+            field=models.ManyToManyField(related_name='favorite', to='payments.FavoriteItem', verbose_name='Объекты корзины'),
         ),
         migrations.AddField(
             model_name='favorite',

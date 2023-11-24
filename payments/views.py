@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from common.permissions import ManagerPermission
 from common.constants import CANCELED, DONE, DONT_ENOUGH_MONEY, DONT_AVAILABLE
-from payments.models import CreditCard, Order, favorite
+from payments.models import CreditCard, Order, Favorite
 from payments.serializers import CreditCardSerializer, OrderSerializer, TransactionSerializer, favoriteSerializer
 
 import logging
