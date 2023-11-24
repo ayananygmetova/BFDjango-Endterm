@@ -2,8 +2,8 @@ import datetime
 
 from rest_framework import serializers
 
-from payments.models import CreditCard, Order, Transaction, Cart, CartItem
-from market.serializers import ProductSerializer
+from payments.models import CreditCard, Order, Transaction, favorite, favoriteItem
+from market.serializers import ApartmentSerializer
 from common import messages
 
 
@@ -24,30 +24,30 @@ class CreditCardSerializer(serializers.ModelSerializer):
         return card
 
 
-class CartSerializer(serializers.ModelSerializer):
-    cart_items = serializers.SerializerMethodField()
+class favoriteSerializer(serializers.ModelSerializer):
+    favorite_items = serializers.SerializerMethodField()
 
     class Meta:
-        model = Cart
-        fields = ['user', 'cart_items', 'total_sum']
+        model = favorite
+        fields = ['user', 'favorite_items', 'total_sum']
 
-    def get_cart_items(self, obj):
-        print(obj.cart_items.all())
-        return CartItemSerializer(obj.cart_items.all(), many=True).data
+    def get_favorite_items(self, obj):
+        print(obj.favorite_items.all())
+        return favoriteItemSerializer(obj.favorite_items.all(), many=True).data
 
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ['cart', 'availability']
+        fields = ['favorite', 'availability']
 
 
 class TransactionReadSerializer(serializers.ModelSerializer):
-    cart = CartSerializer()
+    favorite = favoriteSerializer()
 
     class Meta:
         model = Transaction
-        fields = ['cart', 'date_created']
+        fields = ['favorite', 'date_created']
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -58,9 +58,9 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'transaction', 'status', 'assignee']
 
 
-class CartItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer()
+class favoriteItemSerializer(serializers.ModelSerializer):
+    Apartment = ApartmentSerializer()
 
     class Meta:
-        model = CartItem
+        model = favoriteItem
         fields = '__all__'

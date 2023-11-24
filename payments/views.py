@@ -8,8 +8,8 @@ from rest_framework.views import APIView
 
 from common.permissions import ManagerPermission
 from common.constants import CANCELED, DONE, DONT_ENOUGH_MONEY, DONT_AVAILABLE
-from payments.models import CreditCard, Order, Cart
-from payments.serializers import CreditCardSerializer, OrderSerializer, TransactionSerializer, CartSerializer
+from payments.models import CreditCard, Order, favorite
+from payments.serializers import CreditCardSerializer, OrderSerializer, TransactionSerializer, favoriteSerializer
 
 import logging
 
@@ -38,38 +38,38 @@ class CreditCardView(viewsets.ViewSet, mixins.CreateModelMixin):
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class CartView(APIView):
+class favoriteView(APIView):
     permission_classes = (IsAuthenticated, )
 
     def get(self, request):
         try:
-            logger.info('get cart')
-            cart = Cart.objects.personal(user=request.user)
-            return Response(CartSerializer(cart).data, status=status.HTTP_200_OK)
+            logger.info('get favorite')
+            favorite = Favorite.objects.personal(user=request.user)
+            return Response(favoriteSerializer(favorite).data, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f'get cart - {str(e)}')
+            logger.error(f'get favorite - {str(e)}')
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request):
         try:
-            logger.info('post items to cart')
+            logger.info('post items to favorite')
             data = json.loads(request.body)
-            Cart.objects.add_product(user=request.user, product_id=data['product_id'], amount=data.get('amount', 1))
+            Favorite.objects.add_apartment(user=request.user, Apartment_id=data['Apartment_id'], amount=data.get('amount', 1))
             return Response({'info': 'added'}, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"post item to cart - str(e)")
+            logger.error(f"post item to favorite - str(e)")
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CardDetails(APIView):
     def post(self, request):
         try:
-            logger.info(f'delete item from cart {str(request.data)}')
+            logger.info(f'delete item from favorite {str(request.data)}')
             data = json.loads(request.body)
-            Cart.objects.remove_product(user=request.user, product_id=data['product_id'])
+            Favorite.objects.remove_apartment(user=request.user, Apartment_id=data['Apartment_id'])
             return Response({'info': 'deleted'}, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f'delete item from cart {str(request.data)} - {str(e)}')
+            logger.error(f'delete item from favorite {str(request.data)} - {str(e)}')
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -79,25 +79,25 @@ class TransactionView(viewsets.ViewSet, mixins.CreateModelMixin):
     def create(self, request):
         try:
             logger.info(f'create transaction: {request.data}')
-            cart = Cart.objects.get(user=request.user)
+            favorite = Favorite.objects.get(user=request.user)
             card = CreditCard.objects.get(user=request.user)
-            has_balance = cart.check_balance()
+            has_balance = favorite.check_balance()
             if has_balance == DONT_ENOUGH_MONEY:
                 raise Exception('У вас недостаточно средств на карте')
-            is_available = cart.check_availability()
+            is_available = favorite.check_availability()
             if is_available[0] == DONT_AVAILABLE:
                 raise Exception('Данных товаров нет в наличии')
             available = is_available[1]
-            new_cart = Cart.objects.create(total_sum=cart.total_sum)
-            for cart_item in cart.cart_items.all():
-                new_cart.cart_items.add(cart_item.id)
-            new_cart.save()
-            data = {"cart": new_cart.id, 'availability': available}
+            new_favorite = Favorite.objects.create(total_sum=favorite.total_sum)
+            for favorite_item in favorite.favorite_items.all():
+                new_favorite.favorite_items.add(favorite_item.id)
+            new_favorite.save()
+            data = {"favorite": new_favorite.id, 'availability': available}
             serializer = TransactionSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                cart.withdraw_money()
-                cart.empty_cart()
+                favorite.withdraw_money()
+                favorite.empty_favorite()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except CreditCard.DoesNotExist:
             logger.error(f'create transaction: {request.data} - credit card doesn\'t exist')

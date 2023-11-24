@@ -1,7 +1,7 @@
 from django_filters import CharFilter
 
 from common.filters import FilterSet
-from market.models import Product
+from market.models import Apartment
 from . import models
 
 
@@ -21,7 +21,7 @@ class CategoryFilter(FilterSet):
         return queryset.filter(children=None)
 
     def filter_brand(self, queryset, name, value):
-        categories = Product.objects.filter(brand_id=value, on_sale=True).values_list('category')
+        categories = Apartment.objects.filter(brand_id=value, on_sale=True).values_list('category')
         return queryset.filter(id__in=categories)
 
 
@@ -33,5 +33,5 @@ class BrandFilter(FilterSet):
         fields = []
 
     def filter_category(self, queryset, name, value):
-        brands = Product.objects.filter(category_id=value).values_list('brand')
+        brands = Apartment.objects.filter(category_id=value).values_list('brand')
         return queryset.filter(id__in=brands)

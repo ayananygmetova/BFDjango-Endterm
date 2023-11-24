@@ -3,7 +3,7 @@ from django.dispatch import receiver
 
 from auth_.models import User
 from common.constants import PENDING, DONE
-from market.models import ProductAvailability
+from market.models import ApartmentAvailability
 from payments.models import Order, Transaction
 
 

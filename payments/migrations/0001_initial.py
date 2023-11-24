@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Cart',
+            name='favorite',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
             ],
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date_created', models.DateTimeField(auto_now=True, verbose_name='Дата создания')),
-                ('cart', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='transaction', to='payments.cart', verbose_name='Корзина')),
+                ('favorite', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='transaction', to='payments.favorite', verbose_name='Корзина')),
             ],
             options={
                 'verbose_name': 'Транзакция',
@@ -68,11 +68,11 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='CartItem',
+            name='favoriteItem',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('amount', models.IntegerField(verbose_name='Количество товаров')),
-                ('product', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='market.product', verbose_name='Товар')),
+                ('Apartment', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='market.Apartment', verbose_name='Товар')),
             ],
             options={
                 'verbose_name': 'Объект корзины',
@@ -80,13 +80,13 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.AddField(
-            model_name='cart',
-            name='cart_items',
-            field=models.ManyToManyField(related_name='cart', to='payments.CartItem', verbose_name='Объекты корзины'),
+            model_name='favorite',
+            name='favorite_items',
+            field=models.ManyToManyField(related_name='favorite', to='payments.favoriteItem', verbose_name='Объекты корзины'),
         ),
         migrations.AddField(
-            model_name='cart',
+            model_name='favorite',
             name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cart', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorite', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
         ),
     ]

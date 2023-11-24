@@ -3,7 +3,7 @@ from django.db import models
 
 from common.constants import DONT_ENOUGH_MONEY, MONEY_ENOUGH, ORDER_STATUSES, AVAILABLE, DONT_AVAILABLE
 from common.utils import random_nums, random_csv
-from market.models import ProductAvailability, ProductUnit
+from market.models import ApartmentAvailability, ApartmentUnit
 
 
 class CreditCard(models.Model):
@@ -19,44 +19,44 @@ class CreditCard(models.Model):
         verbose_name_plural = 'Кредитные карты'
 
 
-class CartItem(ProductUnit):
+class favoriteItem(ApartmentUnit):
     class Meta:
         verbose_name = 'Объект корзины'
         verbose_name_plural = 'Объекты корзины'
 
 
-class CartManager(models.Manager):
+class favoriteManager(models.Manager):
     def personal(self, user):
-        return Cart.objects.get(user=user)
+        return Favorite.objects.get(user=user)
 
-    def add_product(self, user, product_id, amount):
-        from market.models import Product
-        product = Product.objects.get(id=product_id)
-        cart = Cart.objects.personal(user=user)
-        item = cart.cart_items.filter(product=product).first()
+    def add_apartment(self, user, Apartment_id, amount):
+        from market.models import Apartment
+        Apartment = Apartment.objects.get(id=Apartment_id)
+        favorite = Favorite.objects.personal(user=user)
+        item = favorite.favorite_items.filter(Apartment=Apartment).first()
         if item:
             item.amount = amount
             item.save()
         else:
-            item = CartItem.objects.create(product=product, amount=amount)
-            cart.cart_items.add(item)
-            cart.save()
+            item = favoriteItem.objects.create(Apartment=Apartment, amount=amount)
+            favorite.favorite_items.add(item)
+            favorite.save()
 
-    def remove_product(self, user, product_id):
-        from market.models import Product
-        Product.objects.get(id=product_id)
-        cart = Cart.objects.personal(user=user)
-        item = cart.cart_items.filter(product__id=product_id).first()
-        cart.cart_items.remove(item)
-        cart.save()
+    def remove_apartment(self, user, Apartment_id):
+        from market.models import Apartment
+        Apartment.objects.get(id=Apartment_id)
+        favorite = Favorite.objects.personal(user=user)
+        item = favorite.favorite_items.filter(Apartment__id=Apartment_id).first()
+        favorite.favorite_items.remove(item)
+        favorite.save()
 
 
-class Cart(models.Model):
-    user = models.ForeignKey('auth_.User', on_delete=models.CASCADE, verbose_name='Пользователь', related_name='cart',
+class Favorite(models.Model):
+    user = models.ForeignKey('auth_.User', on_delete=models.CASCADE, verbose_name='Пользователь', related_name='favorite',
                              null=True, blank=True)
-    cart_items = models.ManyToManyField(CartItem, related_name='cart', verbose_name='Объекты корзины')
+    favorite_items = models.ManyToManyField(favoriteItem, related_name='favorite', verbose_name='Объекты корзины')
     total_sum = models.IntegerField(default=0, verbose_name='Сумма')
-    objects = CartManager()
+    objects = favoriteManager()
 
     class Meta:
         verbose_name = 'Корзина покупок'
@@ -65,8 +65,8 @@ class Cart(models.Model):
     @property
     def total_sum(self):
         sum = 0
-        for item in self.cart_items.all():
-            sum_item = item.amount * item.product.current_price
+        for item in self.favorite_items.all():
+            sum_item = item.amount * item.Apartment.current_price
             sum += sum_item
         self.total_sum = sum
         self.save()
@@ -85,22 +85,22 @@ class Cart(models.Model):
             card.balance -= self.total_sum
             card.save()
 
-    def empty_cart(self):
-        for item in self.cart_items.all():
-            self.cart_items.remove(item)
+    def empty_favorite(self):
+        for item in self.favorite_items.all():
+            self.favorite_items.remove(item)
         self.save()
 
     def check_availability(self):
         city = self.user.cur_city
-        items = self.cart_items.all()
-        available = ProductAvailability.objects.filter(shop__city=city)
+        items = self.favorite_items.all()
+        available = ApartmentAvailability.objects.filter(shop__city=city)
         for a in available:
-            has_products = True
+            has_apartments = True
             for item in items:
-                product_items = available.filter(product=item.product, amount__gte=item.amount)
-                if not product_items:
-                    has_products = False
-            if has_products:
+                Apartment_items = available.filter(Apartment=item.Apartment, amount__gte=item.amount)
+                if not Apartment_items:
+                    has_apartments = False
+            if has_apartments:
                 return (AVAILABLE,a.id)
         return (DONT_AVAILABLE, '')
 
@@ -111,10 +111,10 @@ class Cart(models.Model):
 
 
 class Transaction(models.Model):
-    cart = models.ForeignKey('Cart', on_delete=models.CASCADE, related_name='transaction', verbose_name='Корзина',
+    favorite = models.ForeignKey('favorite', on_delete=models.CASCADE, related_name='transaction', verbose_name='Корзина',
                              null=True, blank=True)
     date_created = models.DateTimeField(auto_now=True, verbose_name='Дата создания')
-    availability = models.ForeignKey('market.ProductAvailability', on_delete=models.SET_NULL, related_name='transaction',
+    availability = models.ForeignKey('market.ApartmentAvailability', on_delete=models.SET_NULL, related_name='transaction',
                                      verbose_name='Наличие товара', null=True, blank=True)
 
     class Meta:
@@ -124,7 +124,7 @@ class Transaction(models.Model):
 
 class OrderManager(models.Manager):
     def user_orders(self, user):
-        return Order.objects.filter(transaction__cart__user=user)
+        return Order.objects.filter(transaction__favorite__user=user)
 
     def assignee_orders(self, assignee):
         return Order.objects.filter(assignee=assignee)

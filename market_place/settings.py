@@ -161,7 +161,7 @@ LOGGING = {
             'handlers': ['file_handler', 'console_handler'],
             'level': 'DEBUG',
         },
-        'product': {
+        'Apartment': {
             'handlers': ['console_handler'],
             'level': 'DEBUG',
         },

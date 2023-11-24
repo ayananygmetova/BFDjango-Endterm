@@ -2,15 +2,15 @@ from rest_framework import serializers
 
 from auth_.serializers import UserSerializer
 from core.serializers import BrandSerializer
-from .models import ProductReview, ProductCharacteristics, Product, Property, GroupProperties, \
-    ProductAvailability
+from .models import ApartmentReview, ApartmentCharacteristics, Apartment, Property, GroupProperties, \
+    ApartmentAvailability
 
 
-class ProductReviewSerilalizer(serializers.ModelSerializer):
+class ApartmentReviewSerilalizer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
 
     class Meta:
-        model = ProductReview
+        model = ApartmentReview
         fields = ['id', 'user', 'review', 'rating']
 
 
@@ -36,7 +36,7 @@ class PropertiesSerializer(PropertiesBaseSerializer):
 
 class CharacteristicsBaseSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProductCharacteristics
+        model = ApartmentCharacteristics
         fields = '__all__'
 
 
@@ -44,24 +44,24 @@ class CharacteristicsSerializer(CharacteristicsBaseSerializer):
     property = serializers.CharField(source='property.name')
 
     class Meta:
-        model = ProductCharacteristics
+        model = ApartmentCharacteristics
         fields = CharacteristicsBaseSerializer.Meta.fields
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ApartmentSerializer(serializers.ModelSerializer):
     rating = serializers.FloatField(read_only=True)
 
     class Meta:
-        model = Product
+        model = Apartment
         fields = ['id', 'name', 'real_price', 'current_price', 'discount', 'image', 'rating']
 
 
-class ProductDetailSerializer(ProductSerializer):
+class ApartmentDetailSerializer(ApartmentSerializer):
     brand = BrandSerializer(read_only=True)
     characteristics = serializers.SerializerMethodField()
 
-    class Meta(ProductSerializer.Meta):
-        fields = ProductSerializer.Meta.fields + ['category', 'brand', 'characteristics', 'is_recommended',
+    class Meta(ApartmentSerializer.Meta):
+        fields = ApartmentSerializer.Meta.fields + ['category', 'brand', 'characteristics', 'is_recommended',
                                                   'is_popular']
 
     def get_characteristics(self, obj):
@@ -69,23 +69,23 @@ class ProductDetailSerializer(ProductSerializer):
         return CharacteristicsSerializer(characteristics, many=True).data
 
 
-class ProductCreateSerializer(ProductSerializer):
+class ApartmentCreateSerializer(ApartmentSerializer):
     characteristics = serializers.ListSerializer(child=serializers.IntegerField(), write_only=True)
 
-    class Meta(ProductSerializer.Meta):
-        fields = ProductSerializer.Meta.fields + ['category', 'brand', 'characteristics', 'is_recommended',
+    class Meta(ApartmentSerializer.Meta):
+        fields = ApartmentSerializer.Meta.fields + ['category', 'brand', 'characteristics', 'is_recommended',
                                                   'is_popular']
 
     def create(self, validated_data):
         characteristics_ids = validated_data.pop('characteristics')
-        product = Product.objects.create(**validated_data)
-        characteristics = ProductCharacteristics.objects.filter(id__in=characteristics_ids)
+        Apartment = Apartment.objects.create(**validated_data)
+        characteristics = ApartmentCharacteristics.objects.filter(id__in=characteristics_ids)
         for ch in characteristics:
-            product.characteristics.add(ch.id)
-        return product
+            Apartment.characteristics.add(ch.id)
+        return Apartment
 
 
-class ProductAvailabilitySerializer(serializers.ModelSerializer):
+class ApartmentAvailabilitySerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProductAvailability
-        fields = ['id', 'product', 'shop', 'amount']
+        model = ApartmentAvailability
+        fields = ['id', 'Apartment', 'shop', 'amount']

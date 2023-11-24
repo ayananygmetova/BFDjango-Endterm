@@ -5,7 +5,7 @@ from django_filters import rest_framework as filters
 
 from common.filters import FilterSet
 from . import models
-from .models import Product
+from .models import Apartment
 
 
 class PropertyFilter(FilterSet):
@@ -16,11 +16,11 @@ class PropertyFilter(FilterSet):
         fields = []
 
     def filter_category(self, queryset, name, value):
-        properties = Product.objects.filter(category_id=value, on_sale=True).values_list('characteristics__property')
+        properties = Apartment.objects.filter(category_id=value, on_sale=True).values_list('characteristics__property')
         return queryset.filter(id__in=properties)
 
 
-class ProductFilter(FilterSet):
+class ApartmentFilter(FilterSet):
     category = CharFilter(method='filter_category')
     brand = CharFilter(method='filter_brand')
     characteristics = CharFilter(method='filter_characteristics')
@@ -60,5 +60,5 @@ class ProductFilter(FilterSet):
         return queryset.order_by('current_price')
 
     class Meta:
-        model = models.Product
+        model = models.Apartment
         fields = []

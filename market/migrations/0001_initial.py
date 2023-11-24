@@ -29,19 +29,19 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='Product',
+            name='Apartment',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=200, verbose_name='Наименование')),
                 ('discount', models.IntegerField(blank=True, null=True, verbose_name='Скидка')),
                 ('current_price', models.IntegerField(verbose_name='Текущая цена')),
                 ('real_price', models.IntegerField(default='current_price', verbose_name='Настоящая цена')),
-                ('image', models.ImageField(blank=True, null=True, upload_to='product_images', validators=[common.validators.validate_file_size, common.validators.validate_extension])),
+                ('image', models.ImageField(blank=True, null=True, upload_to='Apartment_images', validators=[common.validators.validate_file_size, common.validators.validate_extension])),
                 ('is_recommended', models.BooleanField(default=False, verbose_name='Рекомендованный')),
                 ('is_popular', models.BooleanField(default=False, verbose_name='Популярный')),
                 ('is_new', models.BooleanField(default=False, verbose_name='Новинка')),
-                ('brand', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='products', to='core.brand', verbose_name='Бренд')),
-                ('category', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='products', to='core.category', verbose_name='Категория товара')),
+                ('brand', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='Apartments', to='core.brand', verbose_name='Бренд')),
+                ('category', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='Apartments', to='core.category', verbose_name='Категория товара')),
             ],
             options={
                 'verbose_name': 'Товар',
@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='ProductReview',
+            name='ApartmentReview',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('review', models.TextField(blank=True, null=True, verbose_name='Отзыв')),
@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='ProductCharacteristics',
+            name='ApartmentCharacteristics',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('value', models.CharField(max_length=1000, verbose_name='Значение')),
@@ -90,11 +90,11 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='ProductAvailability',
+            name='ApartmentAvailability',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('amount', models.IntegerField(verbose_name='Количество товаров')),
-                ('product', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='market.product', verbose_name='Товар')),
+                ('Apartment', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='market.Apartment', verbose_name='Товар')),
                 ('shop', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='avalability', to='core.shop', verbose_name='Магазин')),
             ],
             options={
@@ -103,13 +103,13 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.AddField(
-            model_name='product',
+            model_name='Apartment',
             name='characteristics',
-            field=models.ManyToManyField(blank=True, null=True, related_name='product', to='market.ProductCharacteristics', verbose_name='Характеристики'),
+            field=models.ManyToManyField(blank=True, null=True, related_name='Apartment', to='market.ApartmentCharacteristics', verbose_name='Характеристики'),
         ),
         migrations.AddField(
-            model_name='product',
+            model_name='Apartment',
             name='reviews',
-            field=models.ManyToManyField(blank=True, null=True, related_name='product', to='market.ProductReview', verbose_name='Оценивание товара'),
+            field=models.ManyToManyField(blank=True, null=True, related_name='Apartment', to='market.ApartmentReview', verbose_name='Оценивание товара'),
         ),
     ]
